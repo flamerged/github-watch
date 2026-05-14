@@ -1039,11 +1039,13 @@ render_setup_rows() {
     emit "--GitHub calls disabled for this run | color=gray"
   elif ! have "$GH"; then
     emit "--Missing gh: brew install gh | color=#cc3333"
+    emit "--Open GitHub CLI install docs | href=https://cli.github.com color=gray"
   elif ! have "$JQ"; then
     emit "--Missing jq: brew install jq | color=#cc3333"
   elif ! gh_auth_status; then
     emit "--gh is not authenticated for ${GH_HOST} | color=#cc3333"
     emit "--Run: gh auth login | font=Menlo color=gray"
+    emit "--Open terminal for gh auth login | bash=$PLUGIN_PATH param1=auth-login terminal=true refresh=true"
   elif [[ -f "$CACHE_ERROR" ]]; then
     local first_error
     first_error="$(head -1 "$CACHE_ERROR" 2>/dev/null)"
@@ -1100,6 +1102,19 @@ case "${1:-}" in
     ;;
   update-release)
     update_plugin_from_release
+    exit $?
+    ;;
+  auth-login)
+    if have "$GH"; then
+      if [[ "$GH_HOST" == "github.com" ]]; then
+        "$GH" auth login
+      else
+        "$GH" auth login --hostname "$GH_HOST"
+      fi
+    else
+      print "gh is required. Install it from https://cli.github.com or with: brew install gh"
+      exit 1
+    fi
     exit $?
     ;;
   open)

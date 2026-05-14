@@ -12,6 +12,7 @@ It is built for the mailbox problem: after notifications are read, open work can
 - Shows recently closed PRs and issues with merged/closed/completed/not-planned status where GitHub exposes it.
 - Clicks open the PR or issue URL in your browser.
 - Uses `gh` for authentication. No GitHub token is stored in plugin config.
+- Shows whether `gh` is missing or unauthenticated, with menu actions for GitHub CLI install docs and `gh auth login`.
 - Caches GitHub API results so normal SwiftBar refreshes stay fast and low-noise.
 - Supports plugin version checks and release self-update for copied plugin installs.
 - Supports source checkout installs with git metadata and no self-overwrite.
