@@ -65,6 +65,16 @@ print -r -- "$output" | grep -q '^GitHub Watch$'
 print -r -- "$output" | grep -q 'Open config file'
 print -r -- "$output" | grep -q 'Open project page'
 
+missing_gh_output="$(
+  GITHUBWATCH_CONFIG_FILE="$config_file" \
+  GITHUBWATCH_CACHE_FILE="$(mktemp)" \
+  GITHUBWATCH_GH=/no/such/gh \
+  GITHUBWATCH_CHECK_RELEASE_UPDATES=0 \
+  "$PLUGIN"
+)"
+print -r -- "$missing_gh_output" | grep -q 'gh: missing'
+print -r -- "$missing_gh_output" | grep -q 'GitHub CLI install docs'
+
 sample_cache="$(mktemp)"
 cat > "$sample_cache" <<'JSON'
 {

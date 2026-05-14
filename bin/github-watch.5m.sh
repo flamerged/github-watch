@@ -1055,25 +1055,51 @@ render_setup_rows() {
   fi
 }
 
+print_gh_status_rows() {
+  local login label
+  if truthy "$DISABLE_GH"; then
+    emit "--gh: disabled for this run | color=gray"
+  elif ! have "$GH"; then
+    emit "--gh: missing | color=#cc3333"
+    emit "----Install GitHub CLI docs | href=https://cli.github.com color=gray"
+  elif ! have "$JQ"; then
+    emit "--jq: missing | color=#cc3333"
+    emit "----Install with: brew install jq | font=Menlo color=gray"
+  elif ! gh_auth_status; then
+    emit "--gh auth: not authenticated for ${GH_HOST} | color=#cc3333"
+    emit "----Open terminal for gh auth login | bash=$PLUGIN_PATH param1=auth-login terminal=true refresh=true"
+  else
+    login=""
+    if cache_is_valid; then
+      login="$("$JQ" -r '.login // empty' "$CACHE_FILE" 2>/dev/null)"
+    fi
+    label="${login:+${login}@}${GH_HOST}"
+    emit "--gh auth: ${label:-authenticated} | color=#2f8f46"
+  fi
+
+  if [[ -f "$CACHE_ERROR" ]]; then
+    local first_error
+    first_error="$(head -1 "$CACHE_ERROR" 2>/dev/null)"
+    emit "--Last refresh error: $(menu_text "$first_error") | color=#cc3333"
+  fi
+}
+
 print_plugin_rows() {
   local root git_summary version_label release_status release_color latest_release
   root="$(plugin_repo_root)"
   version_label="$(plugin_version_label "$root")"
-  if [[ -z "$root" ]]; then
-    maybe_refresh_release_check
-    release_status="$(release_status_label "$version_label")"
-    release_color="$(release_status_color "$release_status")"
-    emit "--Version: ${version_label} (${release_status}) | font=Menlo color=$release_color"
-  else
-    emit "--Version: ${version_label} | font=Menlo"
-  fi
+  maybe_refresh_release_check
+  release_status="$(release_status_label "$version_label")"
+  release_color="$(release_status_color "$release_status")"
+  emit "--Version: ${version_label} (${release_status}) | font=Menlo color=$release_color"
   emit "--Config: $(shorten_path "$CONFIG_FILE") | font=Menlo"
   emit "--Script: $(shorten_path "$PLUGIN_PATH") | font=Menlo"
+  print_gh_status_rows
   if [[ -n "$root" ]]; then
     git_summary="$(plugin_git_summary "$root")"
     emit "--Repo: $(shorten_path "$root") | font=Menlo"
     emit "--Git: ${git_summary:-unknown} | font=Menlo"
-    emit "----Use git commands for development updates | color=gray"
+    emit "----Source/dev install: update with git pull, not script replacement | color=gray"
   else
     latest_release="$(cached_latest_release_tag 2>/dev/null || true)"
     if [[ -n "$latest_release" && "$(release_tag_norm "$latest_release")" != "$(release_tag_norm "$version_label")" ]]; then
