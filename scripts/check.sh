@@ -64,6 +64,28 @@ print -r -- "$output" | grep -q '^GH setup needed'
 print -r -- "$output" | grep -q '^GitHub Watch$'
 print -r -- "$output" | grep -q 'Open config file'
 print -r -- "$output" | grep -q 'Open project page'
+print -r -- "$output" | grep -q 'Use git commands for development updates'
+if print -r -- "$output" | grep -q 'Update to latest release'; then
+  print -u2 "source checkout installs should not show the release updater"
+  exit 1
+fi
+
+tmp_release_dir="$(mktemp -d)"
+cp "$PLUGIN" "$tmp_release_dir/github-watch.5m.sh"
+chmod +x "$tmp_release_dir/github-watch.5m.sh"
+release_output="$(
+  GITHUBWATCH_CONFIG_FILE="$tmp_release_dir/config.env" \
+  GITHUBWATCH_CACHE_FILE="$tmp_release_dir/inventory.json" \
+  GITHUBWATCH_RELEASE_CHECK_CACHE="$tmp_release_dir/release-check.tsv" \
+  GITHUBWATCH_DISABLE_GH=1 \
+  GITHUBWATCH_CHECK_RELEASE_UPDATES=0 \
+  "$tmp_release_dir/github-watch.5m.sh"
+)"
+print -r -- "$release_output" | grep -q 'Update to latest release'
+if print -r -- "$release_output" | grep -q 'Use git commands for development updates'; then
+  print -u2 "copied release installs should not show source checkout update guidance"
+  exit 1
+fi
 
 missing_gh_output="$(
   GITHUBWATCH_CONFIG_FILE="$config_file" \
