@@ -1088,10 +1088,14 @@ print_plugin_rows() {
   local root git_summary version_label release_status release_color latest_release
   root="$(plugin_repo_root)"
   version_label="$(plugin_version_label "$root")"
-  maybe_refresh_release_check
-  release_status="$(release_status_label "$version_label")"
-  release_color="$(release_status_color "$release_status")"
-  emit "--Version: ${version_label} (${release_status}) | font=Menlo color=$release_color"
+  if [[ -z "$root" ]]; then
+    maybe_refresh_release_check
+    release_status="$(release_status_label "$version_label")"
+    release_color="$(release_status_color "$release_status")"
+    emit "--Version: ${version_label} (${release_status}) | font=Menlo color=$release_color"
+  else
+    emit "--Version: ${version_label} | font=Menlo"
+  fi
   emit "--Config: $(shorten_path "$CONFIG_FILE") | font=Menlo"
   emit "--Script: $(shorten_path "$PLUGIN_PATH") | font=Menlo"
   print_gh_status_rows
@@ -1099,7 +1103,7 @@ print_plugin_rows() {
     git_summary="$(plugin_git_summary "$root")"
     emit "--Repo: $(shorten_path "$root") | font=Menlo"
     emit "--Git: ${git_summary:-unknown} | font=Menlo"
-    emit "----Source/dev install: update with git pull, not script replacement | color=gray"
+    emit "----Use git commands for development updates | color=gray"
   else
     latest_release="$(cached_latest_release_tag 2>/dev/null || true)"
     if [[ -n "$latest_release" && "$(release_tag_norm "$latest_release")" != "$(release_tag_norm "$version_label")" ]]; then

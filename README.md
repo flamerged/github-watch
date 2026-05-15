@@ -65,7 +65,7 @@ cd github-watch
 
 Release installs show whether the installed plugin is current or whether a newer release is available. `Update to latest release` runs in the background, writes to `GITHUBWATCH_UPDATE_LOG`, and replaces the plugin with the latest release asset. Source checkout installs show the current branch and commit for diagnostics, but hide the menu updater to avoid overwriting checkout-managed files. Development updates should use normal git commands in the checkout.
 
-The development installer uses a symlink, matching the `agent-watch` and `menutube` development workflow. The release installer copies a standalone plugin script. The menu updater is only for copied release installs; source checkout installs should be updated with `git pull`.
+The development installer uses a symlink, matching the `agent-watch` and `menutube` development workflow. The release installer copies a standalone plugin script. The menu updater is only shown for copied release installs; source checkout installs show git metadata and should be updated with normal git commands.
 
 ## Requirements
 
